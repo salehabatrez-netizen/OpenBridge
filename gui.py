@@ -37,7 +37,8 @@ if sys.platform == "win32":
 from bridge import BridgeService, DEFAULT_PROMPT_TEMPLATE, DEFAULT_WORKSPACE, find_cloudflared
 import local_cu_preferences
 from floating_status import FloatingStatusWindow
-from ui_kit import Theme, RoundBox, PillButton, Switch, Dot, style_window_chrome
+from ui_kit import (Theme, RoundBox, PillButton, Switch, Dot, Segmented, style_window_chrome, Anim,
+                    fade_in_window, fade_in_text)
 
 class OpenBridgeApp:
     # Class-level default: _drain_ui_events can run against a partially built
@@ -275,8 +276,8 @@ class OpenBridgeApp:
         # Live activity strip: answers "is the AI working right now?" at a glance.
         strip = RoundBox(capabilities, self.theme, fill=self.c_field, radius=12, pad=(14, 10))
         strip.pack(fill='x', pady=(px(14), 0))
-        self.activity_dot = Dot(strip.body, self.theme, self.theme.c['tertiary'])
-        self.activity_dot.pack(side='left', padx=(0, px(10)))
+        self.activity_dot = Dot(strip.body, self.theme, self.theme.c['tertiary'], halo=5)
+        self.activity_dot.pack(side='left', padx=(0, px(5)))
         self.lbl_activity = tk.Label(strip.body, textvariable=self.activity_var,
                                      bg=self.c_field, fg=self.c_muted, font=self.f_body,
                                      anchor='w', justify='left')
@@ -292,17 +293,13 @@ class OpenBridgeApp:
         content = self._card(main, expand=True, pad=(18, 16))
         top = tk.Frame(content, bg=self.c_card)
         top.pack(fill='x', pady=(0, px(12)))
-        segment = RoundBox(top, self.theme, fill=self.theme.c['seg_bg'], radius=10, pad=(3, 3),
-                           fit_width=True)
-        segment.pack(side='left')
-        self._tab_buttons = []
-        for index, label in enumerate(('连接提示词', '运行日志')):
-            button = PillButton(segment.body, self.theme, text=label,
-                                command=lambda i=index: self.notebook.select(i),
-                                variant='segment', height=28, padx=18, radius=8,
-                                font=self.theme.f_btn_small, minwidth=96)
-            button.pack(side='left', padx=(0, px(2)) if index == 0 else 0)
-            self._tab_buttons.append(button)
+        # 选中滑块在两段之间滑动，文字颜色随之过渡（ui_kit.Segmented）
+        self.segment = Segmented(top, self.theme, ('连接提示词', '运行日志'),
+                                 command=lambda i: self.notebook.select(i),
+                                 font=self.theme.f_btn_small, height=34, padx=18, minwidth=96,
+                                 radius=10, inset=3)
+        self.segment.pack(side='left')
+        self._tab_index = None
         self._tab_tools = tk.Frame(top, bg=self.c_card)
         self._tab_tools.pack(side='right')
         self.notebook = ttk.Notebook(content, style='Flat.TNotebook')
@@ -350,11 +347,17 @@ class OpenBridgeApp:
             selected = self.notebook.index('current')
         except tk.TclError:
             selected = 0
-        for index, button in enumerate(self._tab_buttons):
-            button.config(variant='segment_on' if index == selected else 'segment')
+        previous = getattr(self, '_tab_index', None)
+        self._tab_index = selected
+        segment = getattr(self, 'segment', None)
+        if segment is not None:
+            segment.select(selected, animate=previous is not None)
         self._prompt_tools.pack_forget()
         self._log_tools.pack_forget()
         (self._prompt_tools if selected == 0 else self._log_tools).pack(side='right')
+        if previous is not None and previous != selected:
+            # 新页面的文字从底色淡入，和滑块同步
+            fade_in_text(self.txt_prompt if selected == 0 else self.txt_log, self.c_field)
 
     def repair_connection(self):
         if not self.service or not self.service.is_running:
@@ -588,6 +591,7 @@ class OpenBridgeApp:
             self.activity_var.set('AI 操作：服务未启动')
             self.lbl_activity.config(fg=self.c_muted)
             self.activity_dot.set_color(c['tertiary'])
+            self.activity_dot.set_pulse(None)
             self.btn_pause_cu.config(state='disabled', text='暂停 AI 操作', variant='secondary')
             return
         snap = monitor.snapshot()
@@ -614,6 +618,7 @@ class OpenBridgeApp:
             self.activity_var.set(text)
         self.lbl_activity.config(fg=color)
         self.activity_dot.set_color(dot)
+        self.activity_dot.set_pulse('fast' if (snap['busy'] and not snap['paused']) else None)
 
     def toggle_cu_pause(self):
         """Local soft pause: refuse new AI actions, keep adapters and tunnel alive."""
@@ -835,6 +840,9 @@ class OpenBridgeApp:
         text, (tint, color) = states.get(status, ('●  ' + str(status), neutral))
         self.status_var.set(text)
         self.lbl_status.config(bg=tint, fg=color)
+        # 稳定在线：缓慢呼吸；连接 / 恢复中：快速脉动；其余静止
+        self.lbl_status.set_pulse('slow' if status == 'RUNNING_ONLINE' else
+                                  'fast' if status in ('TUNNELING', 'RECONNECTING', 'STOPPING') else None)
         self.btn_toggle_bridge.config(text='启动 Bridge' if stopped else '停止 Bridge',
             variant='primary' if stopped else 'danger',
             state='disabled' if status == 'STOPPING' else 'normal')
@@ -866,6 +874,7 @@ class OpenBridgeApp:
         self.root.clipboard_append(text)
         self.root.update()
 
+        self.btn_copy_prompt.flash('已复制 ✓')
         self.show_toast("提示词已复制 · 直接粘贴给 AI 即可")
         self.append_log("[操作] 开工提示词已复制到剪贴板。", "success")
 
@@ -880,6 +889,7 @@ class OpenBridgeApp:
         self.root.clipboard_clear()
         self.root.clipboard_append(url)
         self.root.update()
+        self.btn_copy_url.flash('已复制 ✓')
         self.show_toast("MCP 地址已复制")
 
     def reset_mcp_url(self):
@@ -912,15 +922,39 @@ class OpenBridgeApp:
     def show_toast(self, msg):
         """Transient pill in the footer centre; a newer toast replaces the old one."""
         toast = self.lbl_copy_toast
+        was_visible = bool(toast.cget('text')) and bool(toast.place_info())
         toast.config(text=msg)
-        if getattr(self, '_footer', None) is not None:
-            toast.place(relx=0.5, rely=0.5, anchor='center')
         if getattr(self, '_toast_after', None):
             self.root.after_cancel(self._toast_after)
+        if getattr(self, '_footer', None) is not None:
+            # 自下而上滑入并淡入；已显示时只换文字，不重复入场
+            rise = self.theme.px(10)
+            slide = getattr(self, '_toast_slide', None)
+            if slide is None:
+                def move():
+                    if toast.cget('text'):
+                        toast.place_configure(y=int(round(slide_anim.value)))
+                slide_anim = self._toast_slide = Anim(toast, move, value=0.0)
+                slide = slide_anim
+            if not was_visible:
+                slide.set(rise)
+                toast.place(relx=0.5, rely=0.5, anchor='center', y=rise)
+                toast.appear(True, 0.24)
+                slide.to(0, 0.28)
+            else:
+                slide.to(0, 0.18)   # 淡出途中来了新提示：config 已让颜色回到可见
         def hide():
             self._toast_after = None
-            toast.config(text='')
-            toast.place_forget()
+            def gone():
+                if self._toast_after is None:   # 期间没有新的提示
+                    toast.config(text='')
+                    toast.place_forget()
+            if getattr(self, '_footer', None) is not None and toast.place_info():
+                toast.appear(False, 0.22, on_done=gone)
+                if getattr(self, '_toast_slide', None) is not None:
+                    self._toast_slide.to(self.theme.px(6), 0.22)
+            else:
+                gone()
         self._toast_after = self.root.after(3200, hide)
 
     def append_log(self, text, tag=None):
@@ -958,6 +992,7 @@ class OpenBridgeApp:
 def main():
     root = tk.Tk()
     app = OpenBridgeApp(root)
+    fade_in_window(root)
     root.mainloop()
 
 if __name__ == "__main__":

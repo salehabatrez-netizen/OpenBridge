@@ -317,6 +317,7 @@ class _PulseDot:
         from ui_kit import blend
         c, t = self.canvas, self.theme
         c.delete('all')
+        c._ob_refs = []   # ui_kit 图片缓存是 LRU：显示中的图片由画布自己持有
         mid = self.box // 2
         if self.phase is not None:
             # halo grows and fades: 0 → 1
@@ -325,10 +326,12 @@ class _PulseDot:
             halo = blend(self.colour, HUD['bg'], 0.55 + 0.45 * self.phase)
             photo = t.circle_photo(d, halo, HUD['bg']) if d >= 2 else None
             if photo is not None:
+                c._ob_refs.append(photo)
                 c.create_image(mid - d // 2, mid - d // 2, image=photo, anchor='nw')
         photo = t.circle_photo(self.size, self.colour, HUD['bg'])
         x = mid - self.size // 2
         if photo is not None:
+            c._ob_refs.append(photo)
             c.create_image(x, x, image=photo, anchor='nw')
         else:
             c.create_oval(x, x, x + self.size, x + self.size, fill=self.colour, outline='')
