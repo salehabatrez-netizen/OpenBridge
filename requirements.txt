@@ -1,0 +1,29 @@
+# OpenBridge core (MCP server, tunnel, GUI, handoff tools) has NO required
+# third-party Python dependencies.
+#
+# Verified by AST-scanning every core module (bridge.py, gui.py, computer_use.py,
+# connection_health.py, floating_status.py, handoff.py, handoff_cli.py,
+# registry.py, connection_probe.py, local_cu_preferences.py): every import
+# resolves to the Python 3.11+ standard library or to a local package in this repo.
+#
+# Requirements:
+#   - Python 3.11 or newer  (tkinter must be present; it ships with the
+#     python.org Windows installer, but on some Linux distros you need python3-tk)
+#   - cloudflared           (only for public tunnel mode; bundled or on PATH)
+#
+# Optional Computer Use adapters are installed into isolated virtualenvs by
+# install_computer_use.cmd and are NOT pip-installed into your main environment:
+#   windows-mcp==0.8.5        (MIT, CursorTouch)
+#   @playwright/mcp@0.0.81    (Apache-2.0, Microsoft — installed via npx)
+#   mcp-for-blender==2.0.0    (MIT, ahujasid)
+#
+# Those require `uv` and Node.js LTS on PATH. See COMPUTER_USE.md.
+#
+# Optional, imported lazily only by the features that need them (the core starts
+# without them):
+#   Pillow    - antialiased GUI widgets in ui_kit.py (falls back to plain Tk),
+#               game/background window screenshots
+#   pywin32   - background_control window capture (win32gui / win32ui)
+#   comtypes  - background_control UI Automation
+# Install only if you use those features:
+#   pip install Pillow pywin32 comtypes

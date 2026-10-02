@@ -1,0 +1,60 @@
+# ─── Secrets: NEVER commit ───────────────────────────────────────────────
+# current_mcp_url.json holds the live tunnel URL. The secret path in that URL
+# IS the access credential for this machine — publishing it grants strangers
+# full workspace and desktop control.
+current_mcp_url.json
+*.secret
+.env
+.env.local
+
+# ─── Local runtime state ─────────────────────────────────────────────────
+logs/
+*.log
+local_cu_prefs.json
+.computer-use/
+.playwright-mcp/
+.input-lab-runs/
+test-artifacts/
+
+# ─── Scratch files ───────────────────────────────────────────────────────
+# Throwaway probe scripts follow the _name.py / _name.txt convention.
+_*.py
+# ...but dunder files are not scratch: __init__.py makes a package importable.
+!__init__.py
+!__main__.py
+_*.txt
+_*.js
+_*.json
+
+# ─── Python ──────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ─── Node ────────────────────────────────────────────────────────────────
+node_modules/
+package-lock.json
+
+# ─── OS ──────────────────────────────────────────────────────────────────
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ─── Workspace-specific, not part of the project ─────────────────────────
+HANDOFF/
+mc_agent/
+watch/
+artworks/
+_agent_tools/
+*_repair_*/
+bridge.v1.backup.py
+*.backup.py
+*.bak
+_coord/

@@ -1,0 +1,8 @@
+# Normalise line endings in the repository; Windows launchers need CRLF on checkout.
+* text=auto
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+*.png binary
+*.jpg binary
+*.ico binary
