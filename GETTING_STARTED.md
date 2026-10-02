@@ -18,7 +18,7 @@ OpenBridge 分三层，**下层不装也能用上层**：
 | **B. Computer Use** | 控制桌面 / 浏览器 | `uv` + Node.js LTS + Edge | 少 3 个入口工具，A 层照常 |
 | **C. Blender** | 8 个建模子工具 | `uv` + Blender 官方版 | Blender 目标不可用，A/B 照常 |
 
-**核心层零第三方 Python 依赖**，不需要 `pip install` 任何东西。
+**核心层零第三方 Python 依赖**，不需要 `pip install` 任何东西。可选：Pillow（更平滑的界面控件、窗口截图）、pywin32 + comtypes（后台窗口控制），见 `requirements.txt`。
 
 ---
 
@@ -170,7 +170,7 @@ winget install BlenderFoundation.Blender
 ## 7. 自检
 
 ```bat
-python -m unittest discover -p "test_*.py"    # 324 项，不需要联网和 GUI
+python -m unittest discover -p "test_*.py"    # 400+ 项，不需要联网和 GUI
 ```
 
 全绿说明包完整。`smoke_*.py` 是**手动**实机检查（需要真实 GUI/浏览器/Blender），

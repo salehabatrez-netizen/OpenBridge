@@ -31,4 +31,4 @@ GUI 增加“记住授权：启动 GUI 时默认开启（本机确认）”。�
 ## 测试和回退
 `python -m unittest discover -q` 为离线回归；`smoke_background_control.py`（需指定 --run）仅操作它自己新建的 Win32 测试窗口，不使用当前业务窗口。实机测试并不证明所有第三方应用兼容。
 
-部署前 gui.py 和 computer_use.py 原件位于 background_repair_20260919/original/*.txt。回退应先本机关闭 GUI，再对现有文件与本次部署散列做校验后恢复两个原件；不要覆盖之后的新修改。新增模块可保留但不会由旧入口加载。回退后再启动 GUI，MCP 地址可能变化。
+回退用 git 恢复 gui.py 和 computer_use.py 的旧版本：先本机关闭 GUI，再恢复；不要覆盖之后的新修改。新增模块可保留但不会由旧入口加载。回退后再启动 GUI，MCP 地址可能变化。

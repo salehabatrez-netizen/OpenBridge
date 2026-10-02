@@ -23,7 +23,7 @@
 
 最终离线回归：**85 项通过**；静态检查 26 个代码文件、0 问题；编译通过。
 
-真实 Windows 测试最终记录：`.input-lab-runs/20260918-130340/report.json`，进程 exit_code=0，success=true；`verified.png` 已下载、SHA-256 校验并实际查看。结果如下：
+真实 Windows 测试最终记录（开发机本地记录，未随仓库发布）：进程 exit_code=0，success=true；验证截图已做 SHA-256 校验并实际查看。结果如下：
 
 | 验收项 | 实际结果 |
 |---|---|

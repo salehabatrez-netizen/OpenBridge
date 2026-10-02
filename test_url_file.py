@@ -103,7 +103,7 @@ class HealthSecrecyTests(unittest.TestCase):
 
     def test_public_origin_strips_secret(self):
         self.assertEqual(
-            _public_origin("https://h.trycloudflare.com/mcp/e4197451d0ddd573020087681c21d5e8"),
+            _public_origin("https://h.trycloudflare.com/mcp/0123456789abcdef0123456789abcdef"),
             "https://h.trycloudflare.com")
 
     def test_public_origin_handles_empty(self):
@@ -111,7 +111,7 @@ class HealthSecrecyTests(unittest.TestCase):
         self.assertEqual(_public_origin(None), "")
 
     def test_health_payload_has_no_secret(self):
-        secret = "e4197451d0ddd573020087681c21d5e8"
+        secret = "0123456789abcdef0123456789abcdef"
         origin = _public_origin("https://h.trycloudflare.com/mcp/%s" % secret)
         self.assertNotIn(secret, origin)
         self.assertNotIn("/mcp/", origin)

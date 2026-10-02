@@ -1,6 +1,8 @@
 # OpenBridge - 本地免费 MCP 桥接控制台
 
-**最新操作方式：一个 Computer Use 按钮统一热启停桌面、浏览器、Blender，切换不改变 MCP 地址。跨对话连接说明见 [CROSS_CHAT.md](CROSS_CHAT.md)。本次代码升级需完整重开 GUI 一次。**
+**中文** | [English](README.en.md)
+
+**最新操作方式：一个 Computer Use 按钮统一热启停桌面、浏览器、Blender，切换不改变 MCP 地址。跨对话连接说明见 [CROSS_CHAT.md](CROSS_CHAT.md)。修改 Python 代码后需完整重开 GUI 才会生效。**
 
 Blender 专用建模已接入：见 [BLENDER_MCP.md](BLENDER_MCP.md)。使用 `target="blender"`，需在本机开启统一的 Computer Use 按钮。
 
@@ -22,9 +24,9 @@ Blender 专用建模已接入：见 [BLENDER_MCP.md](BLENDER_MCP.md)。使用 `t
 
 ---
 
-OpenBridge 是专为网页端大模型（如 **Arena (LMSYS)**、**ChatGPT**、**Claude** 等）打造的本地 MCP（Model Context Protocol）桥接工具。
+OpenBridge 是专为网页端大模型（如 **Arena**、**ChatGPT**、**Claude** 等）打造的本地 MCP（Model Context Protocol）桥接工具。
 
-无需购买第三方收费 Bridge 订阅，不限单日使用时长，**100% 免费开源、零外部 pip 依赖**，基于 Python 3.11 原生标准库开发，随时自由掌控本地代码。
+无需购买第三方收费 Bridge 订阅，不限单日使用时长，**100% 免费开源、核心零外部 pip 依赖**，基于 Python 3.11 原生标准库开发，随时自由掌控本地代码。
 
 ---
 
@@ -139,6 +141,14 @@ python bridge.py --dir "你的项目路径"
 
 ---
 
+## ⚖️ 负责任使用
+
+- 只在你自己拥有、并且正在看着的电脑上运行；用完关闭隧道。
+- 游戏输入和后台窗口控制是给单机/本地自动化用的。许多在线游戏和服务的条款禁止自动化操作，可能导致封号——使用前请自行确认相关条款。
+- 远程 AI 的操作等同于你本人的操作：付款、删除、对外发送等不可逆动作应由你本人确认。
+
+---
+
 ## 📦 开源信息
 
 ### 许可证
@@ -153,18 +163,19 @@ python bridge.py --dir "你的项目路径"
 | 项目 | 要求 | 说明 |
 |---|---|---|
 | Python | **3.11+** | 核心**零第三方依赖**，仅用标准库 |
+| Pillow / pywin32 / comtypes | 可选 | 更平滑的界面控件、窗口截图、后台窗口控制；不装核心照常运行 |
 | tkinter | 随 Python 安装 | GUI 必需；python.org 安装包默认包含 |
 | cloudflared | 可选 | 仅公网隧道模式需要 |
 | uv + Node.js LTS | 可选 | 仅 Computer Use 适配器需要 |
 
-`requirements.txt` 中没有任何 pip 包——这不是遗漏，而是设计目标。
+`requirements.txt` 中没有任何必需的 pip 包——这不是遗漏，而是设计目标；可选依赖在其中以注释列出。
 
 ### 从源码运行
 
 ```bash
 git clone <repo-url>
 cd OpenBridge
-python -m unittest discover -p "test_*.py"   # 324 项，无需联网
+python -m unittest discover -p "test_*.py"   # 400+ 项，无需联网
 pythonw gui.py                                # 启动控制台
 ```
 

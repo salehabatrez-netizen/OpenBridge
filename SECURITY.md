@@ -25,6 +25,10 @@ if Computer Use is enabled, control your desktop.** Treat it exactly like a pass
   They are not isolated sandboxes.
 - Computer Use is **off by default** and can only be enabled from the local GUI.
   A remote client cannot grant itself permission. This is deliberate.
+- The local server listens on all interfaces (`0.0.0.0`) so the tunnel and LAN
+  clients can reach it; the secret path is what protects it. `--no-auth` (local
+  debugging only) disables the secret, therefore listens on `127.0.0.1` only and
+  is refused in combination with the public tunnel.
 - The GUI kill switch stops the adapter processes. It is *not* an OS-level sandbox:
   while enabled, desktop automation can reach anything the logged-in user can reach.
 
@@ -33,6 +37,13 @@ if Computer Use is enabled, control your desktop.** Treat it exactly like a pass
 - Run it only on a machine you own, for sessions you are actively supervising.
 - Close the tunnel when you are done.
 - Do not run it on a machine holding credentials you cannot afford to expose.
+
+## Responsible use
+
+Game input and background window control are meant for local, single-player
+automation. Many online games and services forbid automated input in their terms
+of service; check them before use. Irreversible actions (payments, deletion,
+sending messages) should be confirmed by a human.
 
 ## Reporting a vulnerability
 

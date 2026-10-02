@@ -62,6 +62,7 @@ CORE_DIRS = [
 
 DOCS = [
     "README.md",
+    "README.en.md",
     "GETTING_STARTED.md",
     "LICENSE",
     "SECURITY.md",
@@ -121,7 +122,6 @@ LIVE_SECRET_PATTERNS = [
 # Known-safe fixtures: obvious dummies used by the test suite.
 SECRET_ALLOWLIST = {
     "0123456789abcdef0123456789abcdef",
-    "e4197451d0ddd573020087681c21d5e8",   # test_url_file.py fixture
     "00000000000000000000000000000000",
 }
 

@@ -1625,6 +1625,10 @@ class BridgeService:
         self.status_callback = status_callback
         if (enable_desktop or enable_browser or enable_blender) and not require_auth:
             raise ValueError("Computer Use requires MCP authentication")
+        if use_tunnel and not require_auth:
+            # The tunnel publishes the port to the internet; without the secret
+            # path any visitor of the hostname would get a full shell.
+            raise ValueError("A public tunnel requires MCP authentication")
         self.computer_use = ComputerUseManager(desktop=enable_desktop,
             browser=enable_browser, blender=enable_blender, log=self.log)
 
@@ -1725,9 +1729,12 @@ class BridgeService:
             raise ValueError("工作区目录不存在: %s" % self.workspace)
         # Bind atomically rather than probing and releasing the port (a TOCTOU race).
         # Exclusive binding also rejects an older GUI that still uses SO_REUSEADDR.
+        # Without the secret path anyone who can reach the port has full access,
+        # so --no-auth listens on loopback only; LAN exposure requires auth.
+        host = '0.0.0.0' if self.require_auth else '127.0.0.1'
         for candidate_port in list(range(8765, 8815)) + [0]:
             try:
-                self.server = ThreadedHTTPServer(('0.0.0.0', candidate_port), McpHandler)
+                self.server = ThreadedHTTPServer((host, candidate_port), McpHandler)
                 break
             except OSError:
                 if candidate_port == 0:
@@ -2086,7 +2093,9 @@ if __name__ == "__main__":
     parser.add_argument("--dir", default=None, help="指定本地项目工作区目录 (默认当前目录)")
     parser.add_argument("--no-tunnel", action="store_true", help="仅局域网运行，不开启公网隧道")
     parser.add_argument("--no-auth", action="store_true",
-                        help="关闭秘密路径认证（危险，仅限本地调试）")
+                        help="关闭秘密路径认证（危险，仅限本地调试；须配合 --no-tunnel，且只监听 127.0.0.1）")
     args = parser.parse_args()
+    if args.no_auth and not args.no_tunnel:
+        parser.error("--no-auth 只能与 --no-tunnel 一起使用（无认证的公网隧道等于把终端交给任何人）")
     run_bridge(workspace_dir=args.dir, use_tunnel=not args.no_tunnel,
                require_auth=not args.no_auth)

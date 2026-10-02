@@ -81,7 +81,7 @@ python -m py_compile bridge.py gui.py connection_health.py connection_probe.py
 python -m unittest -v test_connection_regression test_connection_health test_url_file test_tunnel_resilience
 ```
 
-修复目录的 `run_staged_tests.py` 使用暂存代码和临时工作目录运行；不接触生产监听器和生产地址文件。覆盖：模拟 28 分钟公网活跃但自检失败、本地调用不能掩盖连续 1033、连接器 readiness 分层、真实 loopback HTTP、真实探测子进程截止时间、鉴权与秘密不泄露、地址发布、监督和既有 GUI 控制回归。模拟时间测试不等同于线上运行 28 分钟，也不等于复现用户历史故障。
+当时的修复在暂存代码和临时工作目录中验证（暂存脚本未随仓库发布），不接触生产监听器和生产地址文件。覆盖：模拟 28 分钟公网活跃但自检失败、本地调用不能掩盖连续 1033、连接器 readiness 分层、真实 loopback HTTP、真实探测子进程截止时间、鉴权与秘密不泄露、地址发布、监督和既有 GUI 控制回归。模拟时间测试不等同于线上运行 28 分钟，也不等于复现用户历史故障。
 
 升级激活后还必须：
 
@@ -94,7 +94,7 @@ python -m unittest -v test_connection_regression test_connection_health test_url
 
 ## 回滚
 
-本次修改前原件保存在 `connection_repair_20260921_1033_01/original/`，附 SHA-256 清单。先关闭 GUI，核对部署后文件未被其他人修改，再恢复本次改变的原件并重启；不要覆盖无关项目。新增模块/测试可留在磁盘上，旧入口不会导入它们，不必为了回滚删除任何用户文件。详细执行记录见修复目录的交接文件。
+用 git 回到修改前的提交（例如 `git log -- bridge.py` 找到对应提交后 `git checkout <提交> -- <文件>`），先关闭 GUI 再恢复并重启。新增模块/测试可留在磁盘上，旧入口不会导入它们。
 
 ## 官方资料
 
